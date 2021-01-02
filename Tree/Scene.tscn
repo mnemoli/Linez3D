@@ -1,0 +1,192 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://ortho/OrthoBall.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Tree/Rotator.gd" type="Script" id=2]
+
+[sub_resource type="CylinderMesh" id=1]
+height = 1.0
+
+[sub_resource type="SpatialMaterial" id=2]
+flags_unshaded = true
+albedo_color = Color( 0.827451, 0.690196, 0.411765, 1 )
+
+[sub_resource type="Environment" id=3]
+background_mode = 1
+background_color = Color( 0, 0.501961, 0.501961, 1 )
+fog_color = Color( 0, 0, 0, 1 )
+fog_depth_begin = 0.1
+fog_depth_end = 10.0
+fog_depth_curve = 1.1487
+
+[node name="Spatial" type="Spatial"]
+
+[node name="Spatial" type="Spatial" parent="."]
+transform = Transform( 1.00034, 0, 0, 0, 1.00017, 0, 0, 0, 1.00022, 0, 3.71408, -17.4968 )
+script = ExtResource( 2 )
+
+[node name="Ground" type="MeshInstance" parent="Spatial"]
+transform = Transform( 3.5, 0, 0, 0, 1, 0, 0, 0, 3.2, 0, -1.23848, 0 )
+mesh = SubResource( 1 )
+material/0 = SubResource( 2 )
+
+[node name="Rootball" parent="Spatial" instance=ExtResource( 1 )]
+transform = Transform( 0.999994, 0, 0, 0, 0.999998, 0, 0, 0, 0.999995, 0.37375, -0.778282, -0.251886 )
+ball_size = 1.458
+ball_color = Color( 0.333333, 0.133333, 0.133333, 1 )
+line_color = Color( 0.45098, 0.45098, 0.505882, 1 )
+
+[node name="Middle" parent="Spatial/Rootball" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.63138, 3.25616, 0 )
+ball_size = 0.401
+ball_color = Color( 0.603922, 0.396078, 0.396078, 1 )
+line_color = Color( 0.603922, 0.396078, 0.396078, 1 )
+line_size = 0.226
+
+[node name="Topmiddle" parent="Spatial/Rootball/Middle" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0813513, 2.04004, 0 )
+ball_size = 0.342
+ball_color = Color( 0.603922, 0.396078, 0.396078, 1 )
+line_color = Color( 0.603922, 0.396078, 0.396078, 1 )
+line_size = 0.193
+
+[node name="Topball" parent="Spatial/Rootball/Middle/Topmiddle" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.20483, 2.37127, -0.00214195 )
+ball_size = 0.979
+ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_color = Color( 0.603922, 0.396078, 0.396078, 1 )
+line_size = 0.173
+
+[node name="Leaf1" parent="Spatial/Rootball/Middle/Topmiddle/Topball" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.897842, 0.448921, 0.976847 )
+ball_size = 0.943
+ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_size = 0.494
+
+[node name="Leaf2" parent="Spatial/Rootball/Middle/Topmiddle/Topball/Leaf1" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.656428, -0.70612, 0.704065 )
+ball_size = 1.001
+ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+
+[node name="Leaf4" parent="Spatial/Rootball/Middle/Topmiddle/Topball" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.26215, 0.448921, -1.08337 )
+ball_size = 0.943
+ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_size = 0.494
+
+[node name="Leaf2" parent="Spatial/Rootball/Middle/Topmiddle/Topball/Leaf4" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.412042, -0.847797, -0.412424 )
+ball_size = 1.001
+ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+
+[node name="Leaf5" parent="Spatial/Rootball/Middle/Topmiddle/Topball" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.429828, 0.448921, -1.08337 )
+ball_size = 0.943
+ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_size = 0.494
+
+[node name="Leaf2" parent="Spatial/Rootball/Middle/Topmiddle/Topball/Leaf5" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.335273, -1.10735, -1.18652 )
+ball_size = 1.001
+ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+
+[node name="Leaf6" parent="Spatial/Rootball/Middle/Topmiddle/Topball" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.11025, 0.448921, -0.0319496 )
+ball_size = 0.943
+ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_size = 0.494
+
+[node name="Leaf2" parent="Spatial/Rootball/Middle/Topmiddle/Topball/Leaf6" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.572722, -1.32167, 0.109911 )
+ball_size = 1.001
+ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+
+[node name="Leaf7" parent="Spatial/Rootball/Middle/Topmiddle/Topball" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8393, 0.448921, -0.0319496 )
+ball_size = 0.943
+ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_size = 0.494
+
+[node name="Leaf2" parent="Spatial/Rootball/Middle/Topmiddle/Topball/Leaf7" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.374569, -1.32167, 0.109911 )
+ball_size = 1.001
+ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+
+[node name="Leaf8" parent="Spatial/Rootball/Middle/Topmiddle/Topball" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.579684, 0.448921, 1.69573 )
+ball_size = 0.943
+ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_size = 0.494
+
+[node name="Leaf2" parent="Spatial/Rootball/Middle/Topmiddle/Topball/Leaf8" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.183085, -1.32167, 0.458048 )
+ball_size = 0.9
+ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+line_color = Color( 0.266667, 0.713726, 0.443137, 1 )
+
+[node name="Coconut" parent="Spatial/Rootball/Middle/Topmiddle/Topball" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.199095, -0.949998, -0.409968 )
+ball_size = 0.744
+ball_color = Color( 0.447059, 0.266667, 0.137255, 1 )
+disable_line = true
+
+[node name="hole" parent="Spatial/Rootball/Middle/Topmiddle/Topball/Coconut" instance=ExtResource( 1 )]
+transform = Transform( 0.887337, 0.00107993, -0.461127, -0.000309504, 0.999998, 0.00174638, 0.461115, -0.00140691, 0.887336, 0.0516787, 0.192049, -0.23816 )
+ball_size = 0.16
+ball_color = Color( 0.125, 0.0527436, 0.00146484, 1 )
+disable_line = true
+
+[node name="hole2" parent="Spatial/Rootball/Middle/Topmiddle/Topball/Coconut" instance=ExtResource( 1 )]
+transform = Transform( 0.887337, 0.00107993, -0.461127, -0.000309504, 0.999998, 0.00174638, 0.461115, -0.00140691, 0.887336, -0.203931, 0.235384, -0.172721 )
+ball_size = 0.16
+ball_color = Color( 0.125, 0.0527436, 0.00146484, 1 )
+disable_line = true
+
+[node name="hole3" parent="Spatial/Rootball/Middle/Topmiddle/Topball/Coconut" instance=ExtResource( 1 )]
+transform = Transform( 0.887337, 0.00107993, -0.461127, -0.000309504, 0.999998, 0.00174638, 0.461115, -0.00140691, 0.887336, -0.105284, 0.111713, -0.258063 )
+ball_size = 0.16
+ball_color = Color( 0.125, 0.0527436, 0.00146484, 1 )
+disable_line = true
+
+[node name="Coconut2" parent="Spatial/Rootball/Middle/Topmiddle/Topball" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.287101, -0.515224, 0.271458 )
+ball_size = 0.72
+ball_color = Color( 0.435294, 0.290196, 0.301961, 1 )
+disable_line = true
+
+[node name="hole4" parent="Spatial/Rootball/Middle/Topmiddle/Topball/Coconut2" instance=ExtResource( 1 )]
+transform = Transform( -0.422813, 0.00145174, -0.906221, -0.000309504, 0.999998, 0.00174639, 0.906216, 0.00101885, -0.422802, -0.0586586, -0.0966706, 0.105391 )
+ball_size = 0.16
+ball_color = Color( 0.125, 0.0527436, 0.00146484, 1 )
+disable_line = true
+
+[node name="hole5" parent="Spatial/Rootball/Middle/Topmiddle/Topball/Coconut2" instance=ExtResource( 1 )]
+transform = Transform( -0.422813, 0.00145174, -0.906221, -0.000309504, 0.999998, 0.00174639, 0.906216, 0.00101885, -0.422802, 0.200648, -0.0533366, 0.154161 )
+ball_size = 0.16
+ball_color = Color( 0.125, 0.0527436, 0.00146484, 1 )
+disable_line = true
+
+[node name="hole6" parent="Spatial/Rootball/Middle/Topmiddle/Topball/Coconut2" instance=ExtResource( 1 )]
+transform = Transform( -0.422813, 0.00145174, -0.906221, -0.000309504, 0.999998, 0.00174639, 0.906216, 0.00101885, -0.422802, 0.0751685, -0.177001, 0.189791 )
+ball_size = 0.16
+ball_color = Color( 0.125, 0.0527436, 0.00146484, 1 )
+disable_line = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 3 )
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939693, 0.481524, -3.35967, 9.29387 )
+projection = 1
+current = true
+size = 10.0

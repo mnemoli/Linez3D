@@ -1,0 +1,31 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://ortho/OrthoBall.gd" type="Script" id=1]
+[ext_resource path="res://ortho/ball_shader.tres" type="Material" id=2]
+[ext_resource path="res://ortho/line_shader.tres" type="Material" id=4]
+
+[sub_resource type="QuadMesh" id=1]
+resource_local_to_scene = true
+size = Vector2( 1.001, 1.001 )
+
+[sub_resource type="QuadMesh" id=2]
+resource_local_to_scene = true
+size = Vector2( 0.01, 1 )
+
+[node name="OrthoBall" type="Spatial"]
+script = ExtResource( 1 )
+ball_size = 1.2
+ball_color = Color( 0.309804, 0.407843, 0.231373, 1 )
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+transform = Transform( 0.999999, 0, 0, 0, 1, 0, 0, 0, 0.999999, 0, 0, 0 )
+material_override = ExtResource( 2 )
+cast_shadow = 0
+mesh = SubResource( 1 )
+material/0 = null
+
+[node name="MeshInstance2" type="MeshInstance" parent="."]
+visible = false
+material_override = ExtResource( 4 )
+mesh = SubResource( 2 )
+material/0 = null

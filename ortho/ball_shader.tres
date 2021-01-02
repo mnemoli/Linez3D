@@ -1,0 +1,35 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=2]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type spatial;
+
+render_mode cull_disabled, unshaded;
+
+uniform vec4 color: hint_color;
+
+void fragment() {
+	float dist = distance(UV, vec2(0.5, 0.5));
+	vec4 v = FRAGCOORD;
+	v.z -= 0.25;
+	
+	// draw a circle
+	if (dist > 0.5) {
+		ALPHA = 0.0;
+	} else {
+		ALBEDO = vec3(color.rgb) - vec3(v.z);
+	}
+	
+	// Allows this to render through the opaque pipeline even though
+	// it's an alpha fragment
+	ALPHA_SCISSOR = 1.0;
+}
+
+void vertex() {
+	// Billboard the plane
+	MODELVIEW_MATRIX = INV_CAMERA_MATRIX * mat4(CAMERA_MATRIX[0],CAMERA_MATRIX[1],CAMERA_MATRIX[2],WORLD_MATRIX[3]);
+}"
+
+[resource]
+resource_local_to_scene = true
+shader = SubResource( 1 )
+shader_param/color = Color( 0, 0, 0, 1 )

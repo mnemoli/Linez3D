@@ -1,0 +1,55 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=2]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type spatial;
+
+render_mode cull_disabled, skip_vertex_transform, unshaded;
+
+uniform vec3 local_direction;
+uniform vec4 color: hint_color;
+uniform float line_width: hint_range(0.1, 1.0) = 0.5;
+
+void fragment() {
+	vec4 v = FRAGCOORD;
+	v.z -= 0.25;
+	ALBEDO = color.rgb - vec3(v.z);
+}
+
+void vertex() {
+	mat4 projection = PROJECTION_MATRIX * MODELVIEW_MATRIX;
+	vec4 vert_in_clip_space = projection * vec4(VERTEX, 1.0);
+	vec2 vert_in_ndc_space = vert_in_clip_space.xy / vert_in_clip_space.w;
+	
+	vec4 next_point = vec4(VERTEX + (local_direction*2.0), 1.0);
+	vec4 next_point_clip_space = projection * next_point;
+	vec2 next_point_ndc_space = next_point_clip_space.xy / next_point_clip_space.w;
+
+	float line_length = length(next_point_ndc_space - vert_in_ndc_space);
+	vec2 line_direction_onscreen = normalize(next_point_ndc_space - vert_in_ndc_space);
+	vec2 normal = vec2(-line_direction_onscreen.y, line_direction_onscreen.x);
+	float orientation = 1.0;
+	
+	if (VERTEX.x < 0.0 ) {
+		orientation *= -1.0;
+	}
+	
+	// deal with viewport scaling and sizing
+	float camera_scale_x = PROJECTION_MATRIX[0].x;
+	float camera_scale_y = PROJECTION_MATRIX[1].y;
+	float aspect = camera_scale_x * camera_scale_y;
+	normal.x /= camera_scale_y;
+	normal.y /= camera_scale_x;
+	vec2 scaled_line_width = vec2(line_width, line_width) * (aspect);
+	
+	vec3 offset = vec3(normal * scaled_line_width * orientation, 0.0);
+	VERTEX = vec3(vert_in_ndc_space, (vert_in_clip_space.z / vert_in_clip_space.w) + 0.0050) + offset;
+	
+	PROJECTION_MATRIX = mat4(1.0);
+}"
+
+[resource]
+resource_local_to_scene = true
+shader = SubResource( 1 )
+shader_param/local_direction = Vector3( 0, -0.5, 0 )
+shader_param/color = Color( 0, 0, 1, 1 )
+shader_param/line_width = 0.5
