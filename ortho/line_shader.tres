@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=2]
 
-[sub_resource type="Shader" id=1]
+[sub_resource type="Shader" id=4]
 code = "shader_type spatial;
 
 render_mode cull_disabled, skip_vertex_transform, unshaded;
@@ -30,17 +30,19 @@ void fragment() {
 	} else {
 		
 		vec2 st = SCREEN_UV;
+		vec2 based_st = SCREEN_UV - center_screen_point;
 		float fp = fuzz_amount / 1000.0;
 		
 		vec2 c = center_screen_point + (screen_normal * 0.45);
 		vec2 c2 = center_screen_point + (screen_normal * 0.3);
-		vec2 c3 = center_screen_point - (screen_normal * 0.3);
-		vec2 c4 = center_screen_point - (screen_normal * 0.45);
+		vec2 c3 = center_screen_point - (screen_normal * 0.45);
+		vec2 c4 = center_screen_point - (screen_normal * 0.3);
 
 		float pp = pixel_size / PROJECTION_MATRIX[0].x;
 		st.y = floor(st.y * pp) / pp;
+		based_st.y = floor(based_st.y * pp) / pp;
 		
-		float r = random(st.y) * fuzz_amount;
+		float r = random(based_st.y) * fuzz_amount;
 		
 		float acceptable_x1 = ((st.y - c.y) / gradient) + c.x;
 		float acceptable_x2 = (st.y / gradient) - (c2.y / gradient) + c2.x;
@@ -89,7 +91,7 @@ void vertex() {
 	vec2 scaled_line_width = vec2(line_width) * (aspect);
 	
 	vec3 offset = vec3(normal * scaled_line_width * orientation, 0.0);
-	VERTEX = vec3(vert_in_ndc_space, (vert_in_clip_space.z / vert_in_clip_space.w) + 0.0035) + offset;
+	VERTEX = vec3(vert_in_ndc_space, (vert_in_clip_space.z / vert_in_clip_space.w) + 0.02) + offset;
 	
 	center_screen_point = ((center_ndc + 1.0)) / 2.0;
 	screen_normal = normal * scaled_line_width;
@@ -102,7 +104,7 @@ void vertex() {
 
 [resource]
 resource_local_to_scene = true
-shader = SubResource( 1 )
+shader = SubResource( 4 )
 shader_param/local_direction = Vector3( 0, -0.5, 0 )
 shader_param/color = Color( 0, 0, 1, 1 )
 shader_param/line_width = 0.5

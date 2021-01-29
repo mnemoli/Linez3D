@@ -9,6 +9,7 @@ uniform vec4 color: hint_color;
 uniform float pixel_size: hint_range(0, 200.0) = 100.0;
 uniform float circle_size: hint_range(0, 1.0) = 0.85;
 uniform float fuzz_amt: hint_range(0.0, 1.0) = 0.2;
+uniform float ball_size = 1.0;
 
 float random (float x) {
     return fract(sin(x)*
@@ -16,7 +17,8 @@ float random (float x) {
 }
 
 void fragment() {
-	vec2 bucketed_uv = trunc(UV * pixel_size) / pixel_size;
+	float pp = pixel_size * ball_size;
+	vec2 bucketed_uv = trunc(UV * pp) / pp;
 	float dist = distance(bucketed_uv, vec2(0.5, 0.5));
 	vec4 v = FRAGCOORD;
 	v.z -= 0.25;
@@ -46,7 +48,8 @@ void vertex() {
 [resource]
 resource_local_to_scene = true
 shader = SubResource( 1 )
-shader_param/color = Color( 0.309804, 0.407843, 0.231373, 1 )
+shader_param/color = Color( 0.396078, 0.533333, 0.282353, 1 )
 shader_param/pixel_size = 100.0
 shader_param/circle_size = 0.85
 shader_param/fuzz_amt = 0.2
+shader_param/ball_size = 1.2

@@ -129,7 +129,7 @@ line_color = Color( 0.266667, 0.713726, 0.443137, 1 )
 line_size = 0.494
 
 [node name="Leaf2" parent="Spatial/Rootball/Middle/Topmiddle/Topball/Leaf8" instance=ExtResource( 1 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.183085, -1.32167, 0.458048 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.183085, -1.32167, 0.458047 )
 ball_size = 0.9
 ball_color = Color( 0.266667, 0.713726, 0.443137, 1 )
 line_color = Color( 0.266667, 0.713726, 0.443137, 1 )

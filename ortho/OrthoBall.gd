@@ -13,14 +13,11 @@ export var line_pixel_size = 50.0 setget change_line_pixel_size
 func _ready():
 	if parent_ball.get_class() != "Ball":
 		$MeshInstance2.visible = false
-		$MeshInstance3.visible = false
 		parent_ball = null
 	elif disable_line:
 		$MeshInstance2.visible = false
-		$MeshInstance3.visible = false
 	else:
 		$MeshInstance2.visible = true
-		$MeshInstance3.visible = false
 		
 func change_line_enabled(new_value):
 	var p = get_parent();
@@ -38,6 +35,7 @@ func get_z_index():
 func change_size(new_value):
 	ball_size = new_value
 	if($MeshInstance != null):
+		$MeshInstance.material_override.set_shader_param("ball_size", new_value)
 		$MeshInstance.mesh.size = Vector2(new_value, new_value)
 		
 func change_line_size(new_value):
@@ -70,6 +68,3 @@ func _process(_delta):
 		$MeshInstance2.material_override.set_shader_param("obj_scale", dist);
 		$MeshInstance2.look_at_from_position(pos, target_pos, parent_ball.global_transform.basis.y)
 		$MeshInstance2.rotation_degrees.x += 90
-		$MeshInstance3.scale.y = dist
-		$MeshInstance3.look_at_from_position(pos, target_pos, parent_ball.global_transform.basis.y)
-		$MeshInstance3.rotation_degrees.x += 90
