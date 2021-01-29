@@ -1,16 +1,98 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://ortho/OrthoBall.gd" type="Script" id=1]
 [ext_resource path="res://ortho/ball_shader.tres" type="Material" id=2]
+[ext_resource path="res://ortho/customquad.obj" type="ArrayMesh" id=3]
 [ext_resource path="res://ortho/line_shader.tres" type="Material" id=4]
+[ext_resource path="res://ortho/Plane.png" type="Texture" id=6]
 
 [sub_resource type="QuadMesh" id=1]
 resource_local_to_scene = true
-size = Vector2( 1.001, 1.001 )
+size = Vector2( 1.2, 1.2 )
 
 [sub_resource type="QuadMesh" id=2]
-resource_local_to_scene = true
 size = Vector2( 0.01, 1 )
+
+[sub_resource type="Shader" id=4]
+code = "shader_type spatial;
+
+render_mode unshaded, cull_disabled, skip_vertex_transform;
+
+uniform float line_width: hint_range(0.1, 1.0) = 1.0;
+uniform sampler2D tex;
+uniform float pixel_size: hint_range(10.0, 500.0) = 100.0;
+uniform float fuzz_size = 0.10;
+
+float random (float x) {
+    return fract(sin(x)*
+        493349.5453123);
+}
+
+void fragment() {
+	float bucketed_x = trunc(UV.x * pixel_size) / pixel_size;
+	float r = random(bucketed_x) * fuzz_size;
+	float y_dist = abs(UV.y - 0.5);
+	
+	if(y_dist < 0.25 || y_dist + 5.0 < 6.0) {
+		ALBEDO = vec3(UV.x)
+	} else {
+//		ALPHA = 0.0;
+	}
+
+	ALBEDO = texture(tex, UV).rgb;
+	
+	ALPHA_SCISSOR = 1.0;
+}
+
+void vertex() {
+	
+	mat4 projection = PROJECTION_MATRIX * MODELVIEW_MATRIX;
+	vec4 vert_in_clip_space = projection * vec4(VERTEX, 1.0);
+	vec2 vert_in_ndc_space = vert_in_clip_space.xy / vert_in_clip_space.w;
+	
+	vec4 next_point = vec4(VERTEX + (vec3(0.0, -0.5, 0.0)*2.0), 1.0);
+	vec4 next_point_clip_space = projection * next_point;
+	vec2 next_point_ndc_space = next_point_clip_space.xy / next_point_clip_space.w;
+
+	float line_length = length(next_point_ndc_space - vert_in_ndc_space);
+	vec2 line_direction_onscreen = normalize(next_point_ndc_space - vert_in_ndc_space);
+	vec2 normal = vec2(-line_direction_onscreen.y, line_direction_onscreen.x);
+	float orientation = 1.0;
+
+	if (VERTEX.x < 0.0) {
+		orientation *= -1.0;
+	}
+
+	// deal with viewport scaling and sizing
+	float camera_scale_x = PROJECTION_MATRIX[0].x;
+	float camera_scale_y = PROJECTION_MATRIX[1].y;
+	float aspect = camera_scale_x * camera_scale_y;
+	normal.x /= camera_scale_y;
+	normal.y /= camera_scale_x;
+	vec2 scaled_line_width = vec2(line_width, line_width) * (aspect);
+
+	vec3 offset = vec3(normal * scaled_line_width * orientation, 0.0);
+	
+	float other_orientation = 1.0;
+	if(normal.x < 0.0) {
+		other_orientation = -1.0;
+	}
+	
+	if(abs(VERTEX.x) > 0.004) {
+		offset.x *= 2.0;
+	}
+
+	VERTEX = vec3(vert_in_ndc_space, (vert_in_clip_space.z / vert_in_clip_space.w) + 0.0050) + offset;
+	
+	PROJECTION_MATRIX = mat4(1.0);
+}"
+
+[sub_resource type="ShaderMaterial" id=3]
+shader = SubResource( 4 )
+shader_param/line_width = 0.5
+shader_param/pixel_size = 100.0
+shader_param/fuzz_size = 0.1
+shader_param/tex = ExtResource( 6 )
 
 [node name="OrthoBall" type="Spatial"]
 script = ExtResource( 1 )
@@ -25,7 +107,11 @@ mesh = SubResource( 1 )
 material/0 = null
 
 [node name="MeshInstance2" type="MeshInstance" parent="."]
-visible = false
 material_override = ExtResource( 4 )
 mesh = SubResource( 2 )
 material/0 = null
+
+[node name="MeshInstance3" type="MeshInstance" parent="."]
+visible = false
+mesh = ExtResource( 3 )
+material/0 = SubResource( 3 )

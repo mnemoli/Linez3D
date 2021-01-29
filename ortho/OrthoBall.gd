@@ -7,15 +7,20 @@ export var line_color = Color.blue setget change_line_color
 export var line_size = 0.5 setget change_line_size
 onready var parent_ball = get_parent()
 export var disable_line = false setget change_line_enabled
+export var line_fuzz_amount = 0.0 setget change_line_fuzz
+export var line_pixel_size = 50.0 setget change_line_pixel_size
 
 func _ready():
 	if parent_ball.get_class() != "Ball":
 		$MeshInstance2.visible = false
+		$MeshInstance3.visible = false
 		parent_ball = null
 	elif disable_line:
 		$MeshInstance2.visible = false
+		$MeshInstance3.visible = false
 	else:
 		$MeshInstance2.visible = true
+		$MeshInstance3.visible = false
 		
 func change_line_enabled(new_value):
 	var p = get_parent();
@@ -47,6 +52,14 @@ func change_color(new_value):
 func change_line_color(new_value):
 	line_color = new_value
 	$MeshInstance2.material_override.set_shader_param("color", new_value)
+
+func change_line_fuzz(new_value):
+	line_fuzz_amount = new_value
+	$MeshInstance2.material_override.set_shader_param("fuzz_amount", new_value)
+
+func change_line_pixel_size(new_value):
+	line_pixel_size = new_value
+	$MeshInstance2.material_override.set_shader_param("pixel_size", new_value)
 	
 func _process(_delta):
 	if(parent_ball != null && transform.origin != Vector3(0,0,0)):
@@ -54,5 +67,9 @@ func _process(_delta):
 		var pos = lerp(target_pos, global_transform.origin, 0.5)
 		var dist = (target_pos - global_transform.origin).length()
 		$MeshInstance2.scale.y = dist
+		$MeshInstance2.material_override.set_shader_param("obj_scale", dist);
 		$MeshInstance2.look_at_from_position(pos, target_pos, parent_ball.global_transform.basis.y)
 		$MeshInstance2.rotation_degrees.x += 90
+		$MeshInstance3.scale.y = dist
+		$MeshInstance3.look_at_from_position(pos, target_pos, parent_ball.global_transform.basis.y)
+		$MeshInstance3.rotation_degrees.x += 90

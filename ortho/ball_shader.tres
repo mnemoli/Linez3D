@@ -6,17 +6,31 @@ code = "shader_type spatial;
 render_mode cull_disabled, unshaded;
 
 uniform vec4 color: hint_color;
+uniform float pixel_size: hint_range(0, 200.0) = 100.0;
+uniform float circle_size: hint_range(0, 1.0) = 0.85;
+uniform float fuzz_amt: hint_range(0.0, 1.0) = 0.2;
+
+float random (float x) {
+    return fract(sin(x)*
+        439999.5453123);
+}
 
 void fragment() {
-	float dist = distance(UV, vec2(0.5, 0.5));
+	vec2 bucketed_uv = trunc(UV * pixel_size) / pixel_size;
+	float dist = distance(bucketed_uv, vec2(0.5, 0.5));
 	vec4 v = FRAGCOORD;
 	v.z -= 0.25;
+	float random_distance = random(bucketed_uv.y) * fuzz_amt * 0.1;
+	if (bucketed_uv.y > 0.1 && bucketed_uv.y < 0.9) {
+		dist -= random_distance;
+	}
 	
-	// draw a circle
-	if (dist > 0.5) {
+	
+	if (dist > 0.5 * circle_size) {
 		ALPHA = 0.0;
 	} else {
 		ALBEDO = vec3(color.rgb) - vec3(v.z);
+		ALPHA = 1.0;	
 	}
 	
 	// Allows this to render through the opaque pipeline even though
@@ -32,4 +46,7 @@ void vertex() {
 [resource]
 resource_local_to_scene = true
 shader = SubResource( 1 )
-shader_param/color = Color( 0, 0, 0, 1 )
+shader_param/color = Color( 0.309804, 0.407843, 0.231373, 1 )
+shader_param/pixel_size = 100.0
+shader_param/circle_size = 0.85
+shader_param/fuzz_amt = 0.2

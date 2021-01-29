@@ -21,7 +21,7 @@ fog_depth_curve = 1.1487
 [node name="Spatial" type="Spatial"]
 
 [node name="Spatial" type="Spatial" parent="."]
-transform = Transform( 1.00034, 0, 0, 0, 1.00017, 0, 0, 0, 1.00022, 0, 3.71408, -17.4968 )
+transform = Transform( 1.00034, 0, 0, 0, 1.00017, 0, 0, 0, 1.00022, 0, 3.71408, -14.4581 )
 script = ExtResource( 2 )
 
 [node name="Ground" type="MeshInstance" parent="Spatial"]

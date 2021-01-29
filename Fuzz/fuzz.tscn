@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://ortho/OrthoBall.tscn" type="PackedScene" id=1]
+
+[node name="Spatial" type="Spatial"]
+
+[node name="OrthoBall" parent="." instance=ExtResource( 1 )]
+ball_color = Color( 0, 0, 0, 1 )
+disable_line = true
+
+[node name="OrthoBall" parent="OrthoBall" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0661297, 1.3314, -8.56071 )
+ball_size = 2.0
+ball_color = Color( 0, 0, 0, 1 )
+line_size = 0.389
+line_fuzz_amount = 0.5
+line_pixel_size = 150.0
