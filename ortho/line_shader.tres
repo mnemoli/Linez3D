@@ -51,10 +51,23 @@ void fragment() {
 		
 		float x_offset = lerp(acceptable_x1, acceptable_x2, r);
 		float x_offset2 = lerp(acceptable_x3, acceptable_x4, r);
+		float x_offset_frag = x_offset * VIEWPORT_SIZE.x;
+		float x_offset2_frag = x_offset2 * VIEWPORT_SIZE.x;
 		ALBEDO = color.rgb;
 		
 		if (st.x > x_offset || st.x < x_offset2)
-			ALPHA = 0.0;
+		ALPHA = 0.0;
+		
+		float outline_size = 10.0 * PROJECTION_MATRIX[0].x;
+		
+		if(FRAGCOORD.x > x_offset_frag && FRAGCOORD.x < x_offset_frag + outline_size) {
+			ALPHA = 1.0;
+			ALBEDO = vec3(0.0);
+		}
+		if(FRAGCOORD.x < x_offset2_frag && FRAGCOORD.x > x_offset2_frag - outline_size) {
+			ALPHA = 1.0;
+			ALBEDO = vec3(0.0);
+		}
 	}
 	
 	ALPHA_SCISSOR = 1.0;
