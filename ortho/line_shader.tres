@@ -30,7 +30,6 @@ void fragment() {
 	} else {
 		
 		vec2 st = SCREEN_UV;
-		vec2 based_st = SCREEN_UV - center_screen_point;
 		float fp = fuzz_amount / 1000.0;
 		
 		vec2 c = center_screen_point + (screen_normal * 0.45);
@@ -40,6 +39,7 @@ void fragment() {
 
 		float pp = pixel_size / PROJECTION_MATRIX[0].x;
 		st.y = floor(st.y * pp) / pp;
+		vec2 based_st = st - center_screen_point;
 		based_st.y = floor(based_st.y * pp) / pp;
 		
 		float r = random(based_st.y) * fuzz_amount;

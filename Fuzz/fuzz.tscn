@@ -54,11 +54,11 @@ shader_param/color = Color( 0.635294, 0.435294, 0.435294, 1 )
 shader_param/pixel_size = 100.0
 shader_param/circle_size = 0.85
 shader_param/fuzz_amt = 0.2
-shader_param/ball_size = 6.0
+shader_param/ball_size = 2.0
 
 [sub_resource type="QuadMesh" id=3]
 resource_local_to_scene = true
-size = Vector2( 6, 6 )
+size = Vector2( 2, 2 )
 
 [sub_resource type="Shader" id=4]
 code = "shader_type spatial;
@@ -90,7 +90,6 @@ void fragment() {
 	} else {
 		
 		vec2 st = SCREEN_UV;
-		vec2 based_st = SCREEN_UV - center_screen_point;
 		float fp = fuzz_amount / 1000.0;
 		
 		vec2 c = center_screen_point + (screen_normal * 0.45);
@@ -100,6 +99,7 @@ void fragment() {
 
 		float pp = pixel_size / PROJECTION_MATRIX[0].x;
 		st.y = floor(st.y * pp) / pp;
+		vec2 based_st = st - center_screen_point;
 		based_st.y = floor(based_st.y * pp) / pp;
 		
 		float r = random(based_st.y) * fuzz_amount;
@@ -168,7 +168,7 @@ shader = SubResource( 4 )
 shader_param/local_direction = Vector3( 0, -0.5, 0 )
 shader_param/color = Color( 0, 0, 1, 1 )
 shader_param/line_width = 0.389
-shader_param/pixel_size = 150.0
+shader_param/pixel_size = 50.0
 shader_param/fuzz_amount = 0.5
 
 [node name="Spatial" type="Spatial"]
@@ -179,11 +179,11 @@ disable_line = true
 
 [node name="OrthoBall" parent="OrthoBall" instance=ExtResource( 1 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0661297, 1.3314, -8.56071 )
-ball_size = 6.0
+ball_size = 2.0
 ball_color = Color( 0.635294, 0.435294, 0.435294, 1 )
 line_size = 0.389
 line_fuzz_amount = 0.5
-line_pixel_size = 150.0
+line_pixel_size = 50.0
 
 [node name="MeshInstance" parent="OrthoBall/OrthoBall" index="0"]
 material_override = SubResource( 2 )
@@ -191,7 +191,6 @@ mesh = SubResource( 3 )
 
 [node name="MeshInstance2" parent="OrthoBall/OrthoBall" index="1"]
 transform = Transform( -0.99997, 0.06613, 0.00118706, 0, 1.3314, -0.988122, -0.0077246, -8.56071, -0.153668, -0.0330648, -0.6657, 4.28035 )
-visible = true
 material_override = SubResource( 5 )
 
 [editable path="OrthoBall/OrthoBall"]
