@@ -24,6 +24,7 @@ mesh = SubResource( 1 )
 material/0 = null
 
 [node name="MeshInstance2" type="MeshInstance" parent="."]
+visible = false
 material_override = ExtResource( 4 )
 mesh = SubResource( 2 )
 material/0 = null

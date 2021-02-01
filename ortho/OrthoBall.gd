@@ -2,8 +2,11 @@ tool
 extends Spatial
 
 export var ball_size = 1.5 setget change_size
+export var fuzz_amt = 0.0 setget change_fuzz
 export var ball_color = Color.red setget change_color
+export var ball_outline_color = Color.black setget change_outline_color
 export var line_color = Color.blue setget change_line_color
+export var line_outline_color = Color.blue setget change_line_outline_color
 export var line_size = 0.5 setget change_line_size
 onready var parent_ball = get_parent()
 export var disable_line = false setget change_line_enabled
@@ -38,6 +41,10 @@ func change_size(new_value):
 		$MeshInstance.material_override.set_shader_param("ball_size", new_value)
 		$MeshInstance.mesh.size = Vector2(new_value, new_value)
 		
+func change_fuzz(new_value):
+	fuzz_amt = new_value
+	$MeshInstance.material_override.set_shader_param("fuzz_amt", new_value)
+		
 func change_line_size(new_value):
 	line_size = new_value
 	$MeshInstance2.material_override.set_shader_param("line_width", new_value)
@@ -46,10 +53,19 @@ func change_color(new_value):
 	ball_color = new_value
 	if($MeshInstance != null):
 		$MeshInstance.material_override.set_shader_param("color", new_value)
+		
+func change_outline_color(new_value):
+	ball_outline_color = new_value
+	if($MeshInstance != null):
+		$MeshInstance.material_override.set_shader_param("outline_color", new_value)
 
 func change_line_color(new_value):
 	line_color = new_value
 	$MeshInstance2.material_override.set_shader_param("color", new_value)
+
+func change_line_outline_color(new_value):
+	line_outline_color = new_value
+	$MeshInstance2.material_override.set_shader_param("outline_color", new_value)
 
 func change_line_fuzz(new_value):
 	line_fuzz_amount = new_value

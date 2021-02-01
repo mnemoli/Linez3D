@@ -6,34 +6,52 @@ code = "shader_type spatial;
 render_mode cull_disabled, unshaded;
 
 uniform vec4 color: hint_color;
+uniform vec4 outline_color: hint_color = vec4(0.0);
 uniform float pixel_size: hint_range(0, 200.0) = 100.0;
 uniform float circle_size: hint_range(0, 1.0) = 0.85;
 uniform float fuzz_amt: hint_range(0.0, 1.0) = 0.2;
 uniform float ball_size = 1.0;
+varying flat vec2 bounds_length;
+varying flat vec2 center_position;
 
 float random (float x) {
     return fract(sin(x)*
         439999.5453123);
 }
 
+float lerp(float a, float b, float w)
+{
+  return a + w*(b-a);
+}
+
 void fragment() {
-	float pp = pixel_size * ball_size;
-	vec2 bucketed_uv = trunc(UV * pp) / pp;
-	float dist = distance(bucketed_uv, vec2(0.5, 0.5));
-	vec4 v = FRAGCOORD;
-	v.z -= 0.25;
-	float random_distance = random(bucketed_uv.y) * fuzz_amt * 0.1;
-	if (bucketed_uv.y > 0.1 && bucketed_uv.y < 0.9) {
-		dist -= random_distance;
-	}
+	vec2 fragcoord = FRAGCOORD.xy;
+	// get vector from coord to the center of the quad
+	vec2 st = (fragcoord - center_position);
 	
+	// fake random x between circle and oval
+	vec2 uv = SCREEN_UV;
+	float r = random(uv.y);
+	vec2 st_oval = st;
+	st_oval.x /= 1.2;
+	st.x = lerp(st.x, st_oval.x, r * fuzz_amt);
+	// now we have a vector pointing from the center of the quad to somewhere between the circle and oval
+	// scale the vector depending on how large the quad is in the viewport
 	
-	if (dist > 0.5 * circle_size) {
-		ALPHA = 0.0;
-	} else {
-		ALBEDO = vec3(color.rgb) - vec3(v.z);
-		ALPHA = 1.0;	
-	}
+	// shift circle left and right to provide outline
+	vec2 st2 = st;
+	st2.x -= sign(st2.x) * 1.0;
+	
+	// scale both by the size of the quad in pixels
+	st /= bounds_length;
+	st2 /= bounds_length;
+	
+	float dist = length(st);
+	float pct = step(dist, 0.5);
+	float pct2 = step(length(st2), 0.5);
+	pct2 -= pct;
+	ALBEDO = vec3(pct * color.rgb + pct2 * outline_color.rgb);
+	ALPHA = pct + pct2;
 	
 	// Allows this to render through the opaque pipeline even though
 	// it's an alpha fragment
@@ -43,13 +61,19 @@ void fragment() {
 void vertex() {
 	// Billboard the plane
 	MODELVIEW_MATRIX = INV_CAMERA_MATRIX * mat4(CAMERA_MATRIX[0],CAMERA_MATRIX[1],CAMERA_MATRIX[2],WORLD_MATRIX[3]);
+	mat4 projection = PROJECTION_MATRIX * MODELVIEW_MATRIX;
+	bounds_length = (projection * vec4(-1.0, -1.0, -1.0, 1.0) - projection * vec4(1.0, 1.0, 1.0, 1.0)).xy * VIEWPORT_SIZE / 4.0;
+	center_position = ((projection * vec4(0.0, 0.0, 0.0, 1.0)).xy);
+	center_position = (center_position + 1.0) / 2.0;
+	center_position *= VIEWPORT_SIZE;
 }"
 
 [resource]
 resource_local_to_scene = true
 shader = SubResource( 1 )
-shader_param/color = Color( 0.396078, 0.533333, 0.282353, 1 )
+shader_param/color = Color( 0.309804, 0.407843, 0.231373, 1 )
+shader_param/outline_color = Color( 0, 0, 0, 1 )
 shader_param/pixel_size = 100.0
 shader_param/circle_size = 0.85
-shader_param/fuzz_amt = 0.2
+shader_param/fuzz_amt = 0.0
 shader_param/ball_size = 1.2

@@ -15,7 +15,7 @@ func _process(delta):
 		time+=0.01
 		rotate_y(1 * delta)
 		rotate_x(sin(time)/2 * delta)
-		cam.size += sin(time)*5.0 * delta
+#		cam.size += sin(time)*5.0 * delta
 	else:
 		rotation_degrees = Vector3(0,0,0)
 		cam.size = 10.0;

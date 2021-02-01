@@ -1,18 +1,20 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=2]
 
-[sub_resource type="Shader" id=4]
+[sub_resource type="Shader" id=1]
 code = "shader_type spatial;
 
 render_mode cull_disabled, skip_vertex_transform, unshaded;
 
 uniform vec3 local_direction;
 uniform vec4 color: hint_color;
+uniform vec4 outline_color: hint_color = vec4(vec3(0.0), 1.0);
 uniform float line_width: hint_range(0.1, 1.0) = 0.5;
-uniform float pixel_size: hint_range(10.0, 500.0) = 50.0;
+uniform float pixel_size = 1.0;
 uniform float fuzz_amount = 0.0;
-varying flat vec2 center_screen_point;
-varying flat vec2 screen_normal;
-varying flat float gradient;
+varying float right_boundary;
+varying float right_boundary2;
+varying float left_boundary;
+varying float left_boundary2;
 
 float random (float x) {
     return fract(sin(x)*
@@ -24,51 +26,16 @@ float lerp(float a, float b, float w) {
 }
 
 void fragment() {
-	if (abs(UV.x - 0.5) < 0.25) {
-		ALPHA = 1.0;
-		ALBEDO = color.rgb;
-	} else {
-		
-		vec2 st = SCREEN_UV;
-		float fp = fuzz_amount / 1000.0;
-		
-		vec2 c = center_screen_point + (screen_normal * 0.45);
-		vec2 c2 = center_screen_point + (screen_normal * 0.3);
-		vec2 c3 = center_screen_point - (screen_normal * 0.45);
-		vec2 c4 = center_screen_point - (screen_normal * 0.3);
-
-		float pp = pixel_size / PROJECTION_MATRIX[0].x;
-		st.y = floor(st.y * pp) / pp;
-		vec2 based_st = st - center_screen_point;
-		based_st.y = floor(based_st.y * pp) / pp;
-		
-		float r = random(based_st.y) * fuzz_amount;
-		
-		float acceptable_x1 = ((st.y - c.y) / gradient) + c.x;
-		float acceptable_x2 = (st.y / gradient) - (c2.y / gradient) + c2.x;
-		float acceptable_x3 = (st.y / gradient) - (c3.y / gradient) + c3.x;
-		float acceptable_x4 = (st.y / gradient) - (c4.y / gradient) + c4.x;
-		
-		float x_offset = lerp(acceptable_x1, acceptable_x2, r);
-		float x_offset2 = lerp(acceptable_x3, acceptable_x4, r);
-		float x_offset_frag = x_offset * VIEWPORT_SIZE.x;
-		float x_offset2_frag = x_offset2 * VIEWPORT_SIZE.x;
-		ALBEDO = color.rgb;
-		
-		if (st.x > x_offset || st.x < x_offset2)
-		ALPHA = 0.0;
-		
-		float outline_size = 10.0 * PROJECTION_MATRIX[0].x;
-		
-		if(FRAGCOORD.x > x_offset_frag && FRAGCOORD.x < x_offset_frag + outline_size) {
-			ALPHA = 1.0;
-			ALBEDO = vec3(0.0);
-		}
-		if(FRAGCOORD.x < x_offset2_frag && FRAGCOORD.x > x_offset2_frag - outline_size) {
-			ALPHA = 1.0;
-			ALBEDO = vec3(0.0);
-		}
-	}
+	float max_x_dist = right_boundary - left_boundary;
+	float r = random(SCREEN_UV.y);
+	float acceptable_x1 = lerp(left_boundary, left_boundary2, r);
+	float acceptable_x2 = lerp(right_boundary, right_boundary2, r);
+	
+	float pct = step(FRAGCOORD.x, acceptable_x2) - step(FRAGCOORD.x, acceptable_x1);
+	float shifted_pct = step(FRAGCOORD.x - 1.0, acceptable_x2) - step(FRAGCOORD.x + 1.0, acceptable_x1);
+	shifted_pct -= pct;
+	ALBEDO = vec3(shifted_pct * outline_color.rgb + pct * color.rgb);
+	ALPHA = pct + shifted_pct;
 	
 	ALPHA_SCISSOR = 1.0;
 }
@@ -104,22 +71,43 @@ void vertex() {
 	vec2 scaled_line_width = vec2(line_width) * (aspect);
 	
 	vec3 offset = vec3(normal * scaled_line_width * orientation, 0.0);
-	VERTEX = vec3(vert_in_ndc_space, (vert_in_clip_space.z / vert_in_clip_space.w) + 0.02) + offset;
+	VERTEX = vec3(vert_in_ndc_space, (vert_in_clip_space.z / vert_in_clip_space.w) + 0.05) + offset;
 	
-	center_screen_point = ((center_ndc + 1.0)) / 2.0;
-	screen_normal = normal * scaled_line_width;
+	// set up some bounds for fuzzing
+	vec2 center_screen_point = (((center_clip_space.xy + 1.0)) / 2.0);
+
+	vec2 screen_normal = normal * scaled_line_width;
 	if(screen_normal.x < 0.0)
 		screen_normal *= -1.0;
-	gradient = line_direction_onscreen.y / line_direction_onscreen.x;
+
+	vec2 right_bound_intersect = center_screen_point + (screen_normal * (0.3 + 0.1 * fuzz_amount));
+	vec2 left_bound_intersect = center_screen_point - (screen_normal * (0.3 + 0.1 * fuzz_amount));
+	vec2 right_bound_intersect2 = center_screen_point + (screen_normal * 0.3);
+	vec2 left_bound_intersect2 = center_screen_point - (screen_normal * 0.3);
+	
+	vec2 vert_moved = ((VERTEX + 1.0) / 2.0).xy;	
+	
+	float gradient = line_direction_onscreen.y / line_direction_onscreen.x;
+	
+	float acceptable_x1 = ((vert_moved.y - right_bound_intersect.y) / gradient) + right_bound_intersect.x;
+	float acceptable_x2 = ((vert_moved.y - left_bound_intersect.y) / gradient) + left_bound_intersect.x;
+	float acceptable_x1_2 = ((vert_moved.y - right_bound_intersect2.y) / gradient) + right_bound_intersect2.x;
+	float acceptable_x2_2 = ((vert_moved.y - left_bound_intersect2.y) / gradient) + left_bound_intersect2.x;
+	
+	right_boundary = acceptable_x1 * VIEWPORT_SIZE.x;
+	left_boundary = acceptable_x2 * VIEWPORT_SIZE.x;
+	right_boundary2 = acceptable_x1_2 * VIEWPORT_SIZE.x;
+	left_boundary2 = acceptable_x2_2 * VIEWPORT_SIZE.x;
 	
 	PROJECTION_MATRIX = mat4(1.0);
 }"
 
 [resource]
 resource_local_to_scene = true
-shader = SubResource( 4 )
+shader = SubResource( 1 )
 shader_param/local_direction = Vector3( 0, -0.5, 0 )
 shader_param/color = Color( 0, 0, 1, 1 )
+shader_param/outline_color = Color( 0, 0, 0, 1 )
 shader_param/line_width = 0.5
-shader_param/pixel_size = 50.0
+shader_param/pixel_size = 1.0
 shader_param/fuzz_amount = 0.0

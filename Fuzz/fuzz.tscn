@@ -1,209 +1,51 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://ortho/OrthoBall.tscn" type="PackedScene" id=1]
-
-[sub_resource type="Shader" id=1]
-code = "shader_type spatial;
-
-render_mode cull_disabled, unshaded;
-
-uniform vec4 color: hint_color;
-uniform float pixel_size: hint_range(0, 200.0) = 100.0;
-uniform float circle_size: hint_range(0, 1.0) = 0.85;
-uniform float fuzz_amt: hint_range(0.0, 1.0) = 0.2;
-uniform float ball_size = 1.0;
-
-float random (float x) {
-    return fract(sin(x)*
-        439999.5453123);
-}
-
-void fragment() {
-	float pp = pixel_size * ball_size;
-	vec2 bucketed_uv = trunc(UV * pp) / pp;
-	float dist = distance(bucketed_uv, vec2(0.5, 0.5));
-	vec4 v = FRAGCOORD;
-	v.z -= 0.25;
-	float random_distance = random(bucketed_uv.y) * fuzz_amt * 0.1;
-	if (bucketed_uv.y > 0.1 && bucketed_uv.y < 0.9) {
-		dist -= random_distance;
-	}
-	
-	
-	if (dist > 0.5 * circle_size) {
-		ALPHA = 0.0;
-	} else {
-		ALBEDO = vec3(color.rgb) - vec3(v.z);
-		ALPHA = 1.0;	
-	}
-	
-	// Allows this to render through the opaque pipeline even though
-	// it's an alpha fragment
-	ALPHA_SCISSOR = 1.0;
-}
-
-void vertex() {
-	// Billboard the plane
-	MODELVIEW_MATRIX = INV_CAMERA_MATRIX * mat4(CAMERA_MATRIX[0],CAMERA_MATRIX[1],CAMERA_MATRIX[2],WORLD_MATRIX[3]);
-}"
-
-[sub_resource type="ShaderMaterial" id=2]
-resource_local_to_scene = true
-shader = SubResource( 1 )
-shader_param/color = Color( 0.635294, 0.435294, 0.435294, 1 )
-shader_param/pixel_size = 100.0
-shader_param/circle_size = 0.85
-shader_param/fuzz_amt = 0.2
-shader_param/ball_size = 2.0
-
-[sub_resource type="QuadMesh" id=3]
-resource_local_to_scene = true
-size = Vector2( 2, 2 )
-
-[sub_resource type="Shader" id=4]
-code = "shader_type spatial;
-
-render_mode cull_disabled, skip_vertex_transform, unshaded;
-
-uniform vec3 local_direction;
-uniform vec4 color: hint_color;
-uniform float line_width: hint_range(0.1, 1.0) = 0.5;
-uniform float pixel_size: hint_range(10.0, 500.0) = 50.0;
-uniform float fuzz_amount = 0.0;
-varying flat vec2 center_screen_point;
-varying flat vec2 screen_normal;
-varying flat float gradient;
-
-float random (float x) {
-    return fract(sin(x)*
-        493349.5453123);
-}
-
-float lerp(float a, float b, float w) {
-	return a + w*(b-a);
-}
-
-void fragment() {
-	if (abs(UV.x - 0.5) < 0.25) {
-		ALPHA = 1.0;
-		ALBEDO = color.rgb;
-	} else {
-		
-		vec2 st = SCREEN_UV;
-		float fp = fuzz_amount / 1000.0;
-		
-		vec2 c = center_screen_point + (screen_normal * 0.45);
-		vec2 c2 = center_screen_point + (screen_normal * 0.3);
-		vec2 c3 = center_screen_point - (screen_normal * 0.45);
-		vec2 c4 = center_screen_point - (screen_normal * 0.3);
-
-		float pp = pixel_size / PROJECTION_MATRIX[0].x;
-		st.y = floor(st.y * pp) / pp;
-		vec2 based_st = st - center_screen_point;
-		based_st.y = floor(based_st.y * pp) / pp;
-		
-		float r = random(based_st.y) * fuzz_amount;
-		
-		float acceptable_x1 = ((st.y - c.y) / gradient) + c.x;
-		float acceptable_x2 = (st.y / gradient) - (c2.y / gradient) + c2.x;
-		float acceptable_x3 = (st.y / gradient) - (c3.y / gradient) + c3.x;
-		float acceptable_x4 = (st.y / gradient) - (c4.y / gradient) + c4.x;
-		
-		float x_offset = lerp(acceptable_x1, acceptable_x2, r);
-		float x_offset2 = lerp(acceptable_x3, acceptable_x4, r);
-		float x_offset_frag = x_offset * VIEWPORT_SIZE.x;
-		float x_offset2_frag = x_offset2 * VIEWPORT_SIZE.x;
-		ALBEDO = color.rgb;
-		
-		if (st.x > x_offset || st.x < x_offset2)
-		ALPHA = 0.0;
-		
-		float outline_size = 10.0 * PROJECTION_MATRIX[0].x;
-		
-		if(FRAGCOORD.x > x_offset_frag && FRAGCOORD.x < x_offset_frag + outline_size) {
-			ALPHA = 1.0;
-			ALBEDO = vec3(0.0);
-		}
-		if(FRAGCOORD.x < x_offset2_frag && FRAGCOORD.x > x_offset2_frag - outline_size) {
-			ALPHA = 1.0;
-			ALBEDO = vec3(0.0);
-		}
-	}
-	
-	ALPHA_SCISSOR = 1.0;
-}
-
-void vertex() {
-	mat4 projection = PROJECTION_MATRIX * MODELVIEW_MATRIX;
-	
-	vec4 center_clip_space = projection * vec4(0.0, 0.0, 0.0, 1.0);
-	vec2 center_ndc = center_clip_space.xy / center_clip_space.w;
-	
-	vec4 vert_in_clip_space = projection * vec4(VERTEX, 1.0);
-	vec2 vert_in_ndc_space = vert_in_clip_space.xy / vert_in_clip_space.w;
-	
-	vec4 next_point = vec4(VERTEX + (local_direction*2.0), 1.0);
-	vec4 next_point_clip_space = projection * next_point;
-	vec2 next_point_ndc_space = next_point_clip_space.xy / next_point_clip_space.w;
-
-	float line_length = length(next_point_ndc_space - vert_in_ndc_space);
-	vec2 line_direction_onscreen = normalize(next_point_ndc_space - vert_in_ndc_space);
-	vec2 normal = vec2(-line_direction_onscreen.y, line_direction_onscreen.x);
-	float orientation = 1.0;
-	
-	if (VERTEX.x < 0.0 ) {
-		orientation *= -1.0;
-	}
-	
-	// deal with viewport scaling and sizing
-	float camera_scale_x = PROJECTION_MATRIX[0].x;
-	float camera_scale_y = PROJECTION_MATRIX[1].y;
-	float aspect = camera_scale_x * camera_scale_y;
-	normal.x /= camera_scale_y;
-	normal.y /= camera_scale_x;
-	vec2 scaled_line_width = vec2(line_width) * (aspect);
-	
-	vec3 offset = vec3(normal * scaled_line_width * orientation, 0.0);
-	VERTEX = vec3(vert_in_ndc_space, (vert_in_clip_space.z / vert_in_clip_space.w) + 0.02) + offset;
-	
-	center_screen_point = ((center_ndc + 1.0)) / 2.0;
-	screen_normal = normal * scaled_line_width;
-	if(screen_normal.x < 0.0)
-		screen_normal *= -1.0;
-	gradient = line_direction_onscreen.y / line_direction_onscreen.x;
-	
-	PROJECTION_MATRIX = mat4(1.0);
-}"
-
-[sub_resource type="ShaderMaterial" id=5]
-resource_local_to_scene = true
-shader = SubResource( 4 )
-shader_param/local_direction = Vector3( 0, -0.5, 0 )
-shader_param/color = Color( 0, 0, 1, 1 )
-shader_param/line_width = 0.389
-shader_param/pixel_size = 50.0
-shader_param/fuzz_amount = 0.5
+[ext_resource path="res://Tree/Rotator.gd" type="Script" id=2]
+[ext_resource path="res://default_env.tres" type="Environment" id=3]
 
 [node name="Spatial" type="Spatial"]
 
-[node name="OrthoBall" parent="." instance=ExtResource( 1 )]
-ball_color = Color( 0, 0, 0, 1 )
+[node name="Spatial" type="Spatial" parent="."]
+script = ExtResource( 2 )
+
+[node name="OrthoBall" parent="Spatial" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1906, 0.13957, 0 )
+ball_color = Color( 1, 1, 1, 1 )
 disable_line = true
 
-[node name="OrthoBall" parent="OrthoBall" instance=ExtResource( 1 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0661297, 1.3314, -8.56071 )
+[node name="OrthoBall" parent="Spatial/OrthoBall" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3.53093, 1.33036, -8.55912 )
 ball_size = 2.0
-ball_color = Color( 0.635294, 0.435294, 0.435294, 1 )
+fuzz_amt = 0.75
+ball_color = Color( 0.917647, 0.623529, 0, 1 )
+ball_outline_color = Color( 0.917647, 0.623529, 0, 1 )
+line_color = Color( 0.101961, 0.258824, 0.396078, 1 )
+line_outline_color = Color( 0, 0, 0, 1 )
 line_size = 0.389
 line_fuzz_amount = 0.5
-line_pixel_size = 50.0
+line_pixel_size = 1000.0
 
-[node name="MeshInstance" parent="OrthoBall/OrthoBall" index="0"]
-material_override = SubResource( 2 )
-mesh = SubResource( 3 )
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="MeshInstance2" parent="OrthoBall/OrthoBall" index="1"]
-transform = Transform( -0.99997, 0.06613, 0.00118706, 0, 1.3314, -0.988122, -0.0077246, -8.56071, -0.153668, -0.0330648, -0.6657, 4.28035 )
-material_override = SubResource( 5 )
+[node name="ViewportContainer" type="ViewportContainer" parent="CanvasLayer"]
+margin_right = 1024.0
+margin_bottom = 768.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+stretch = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
-[editable path="OrthoBall/OrthoBall"]
+[node name="Viewport" type="Viewport" parent="CanvasLayer/ViewportContainer"]
+size = Vector2( 800, 600 )
+handle_input_locally = false
+render_target_update_mode = 3
+
+[node name="Camera" type="Camera" parent="CanvasLayer/ViewportContainer/Viewport"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 11.7273 )
+environment = ExtResource( 3 )
+projection = 1
+size = 10.0
+far = 165.6
